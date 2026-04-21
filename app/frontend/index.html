@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <button onclick="getTasks()">Get Tasks</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function getTasks() {
+      const res = await fetch("http://127.0.0.1:8000/tasks/");
+      const data = await res.json();
+      document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
