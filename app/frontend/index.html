@@ -1,15 +1,76 @@
 <!DOCTYPE html>
 <html>
-<body>
-  <button onclick="getTasks()">Get Tasks</button>
-  <pre id="output"></pre>
-
-  <script>
-    async function getTasks() {
-      const res = await fetch("http://127.0.0.1:8000/tasks/");
-      const data = await res.json();
-      document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+<head>
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: Arial;
+      margin: 40px;
     }
-  </script>
+    input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Task Manager (Minimal UI)</h2>
+
+<!-- Create Task -->
+<input id="taskInput" placeholder="Enter task" />
+<button onclick="createTask()">Add</button>
+
+<!-- Load Tasks -->
+<button onclick="loadTasks()">Refresh</button>
+
+<ul id="taskList"></ul>
+
+<script>
+const API = "/tasks";  // same origin (important)
+
+async function createTask() {
+    const title = document.getElementById("taskInput").value;
+
+    if (!title) return alert("Enter a task");
+
+    await fetch(API + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title })
+    });
+
+    document.getElementById("taskInput").value = "";
+    loadTasks();
+}
+
+async function loadTasks() {
+    const res = await fetch(API + "/");
+    const tasks = await res.json();
+
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    tasks.forEach(task => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            [${task.id}] ${task.title}
+            <button onclick="deleteTask(${task.id})">X</button>
+        `;
+        list.appendChild(li);
+    });
+}
+
+async function deleteTask(id) {
+    await fetch(API + "/" + id, {
+        method: "DELETE"
+    });
+    loadTasks();
+}
+</script>
+
 </body>
 </html>
