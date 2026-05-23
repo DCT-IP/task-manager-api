@@ -16,8 +16,8 @@
     }
   </style>
 </head>
-<body>
 
+<body>
 <h2>Task Manager (Minimal UI)</h2>
 
 <!-- Create Task -->
@@ -53,7 +53,10 @@ async function loadTasks() {
 
     const list = document.getElementById("taskList");
     list.innerHTML = "";
-
+    if (!Array.isArray(tasks)) {
+    console.error(tasks);
+    return;
+}
     tasks.forEach(task => {
         const li = document.createElement("li");
         li.innerHTML = `

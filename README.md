@@ -19,7 +19,8 @@ This project is part of a backend learning roadmap focusing on API design, async
 
 - FastAPI
 - Uvicorn
-- Pydantic
+- sqlalchemy 
+- pymysql
 
 
 ---
