@@ -1,51 +1,86 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskResponse
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])     #prepends /task to all routes to save time and avoid repetition
-#the tags argument is to document all the routes in the file as tasks in docs
+router = APIRouter(
+    prefix="/tasks",
+    tags=["Tasks"]
+)
 
-tasks_db = []
-current_id = 0
+# -------------------------
+# CREATE TASK
+# -------------------------
+@router.post("/", response_model=TaskResponse, status_code=201)
+def create_task(
+    task: TaskCreate,
+    db: Session = Depends(get_db)
+):
+    new_task = Task(
+        title=task.title,
+        completed=False
+    )
+
+    db.add(new_task)
+
+    db.commit()
+
+    db.refresh(new_task)
+
+    return new_task
 
 
-# CREATE
-@router.post("/", response_model=TaskResponse, status_code=201) #status code 201 means created 
-def create_task(task: TaskCreate):
-    global current_id
-    task_data = {
-        "id": current_id,
-        "title": task.title,
-        "completed": False
-    }
-    tasks_db.append(task_data)
-    current_id += 1
-    return task_data
-# frontend sends POST request to /tasks with JSON with a title, body and status
-
-
-# GET ALL
+# -------------------------
+# GET ALL TASKS
+# -------------------------
 @router.get("/", response_model=List[TaskResponse])
-def get_tasks():
-    return tasks_db
-#A get request to tasks simply hands entire tasks_db list
+def get_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(Task).all()
 
-# GET ONE
+    return tasks
+
+
+# -------------------------
+# GET SINGLE TASK
+# -------------------------
 @router.get("/{task_id}", response_model=TaskResponse)
-def get_task(task_id: int):
-    for task in tasks_db:
-        if task["id"] == task_id:
-            return task
-    raise HTTPException(status_code=404, detail="Task not found")
-#A get request to /tasks/{task_id} loops through tasks_db to find a task with the matching id and returns it, otherwise raises 404 error
+def get_task(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+    task = db.query(Task).filter(Task.id == task_id).first()
 
-# DELETE
+    if not task:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
+    return task
+
+
+# -------------------------
+# DELETE TASK
+# -------------------------
 @router.delete("/{task_id}")
-def delete_task(task_id: int):
-    for task in tasks_db:
-        if task["id"] == task_id:
-            tasks_db.remove(task)
-            return {"message": "Task deleted"}
-    raise HTTPException(status_code=404, detail="Task not found")
-#A delete request to /tasks/{task_id} loops through tasks_db to find a task with the matching id and removes it, otherwise raises 404 error
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+    task = db.query(Task).filter(Task.id == task_id).first()
+
+    if not task:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
+    db.delete(task)
+
+    db.commit()
+
+    return {"message": "Task deleted"}

@@ -7,9 +7,10 @@ from app.routes.auth import router as auth_router
 
 from app.database import engine, Base
 from app.models import user, task   # IMPORTANT: registers models
+from app.config import settings
 
 app = FastAPI(
-    title="Task Manager API",
+    title=settings.APP_NAME,
     description="Simple API for managing tasks",
     version="1.0.0"
 )

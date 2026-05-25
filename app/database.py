@@ -1,18 +1,39 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "mysql+pymysql://api_user:1234@localhost:3306/taskdb"
+from app.config import settings
 
+# -------------------------
+# DATABASE ENGINE
+# -------------------------
 engine = create_engine(
-    DATABASE_URL,
-    echo=True,   # helps debug SQL
+    settings.DATABASE_URL,
+    echo=True,
     pool_pre_ping=True
 )
 
+# -------------------------
+# SESSION FACTORY
+# -------------------------
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine
 )
 
+# -------------------------
+# BASE CLASS
+# -------------------------
 Base = declarative_base()
+
+# -------------------------
+# DATABASE DEPENDENCY
+# -------------------------
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+
+    finally:
+        db.close()
