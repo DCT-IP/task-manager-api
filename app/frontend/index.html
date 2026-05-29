@@ -27,52 +27,135 @@
 <!-- Load Tasks -->
 <button onclick="loadTasks()">Refresh</button>
 
-<ul id="taskList"></ul>
+<ul id="taskList" style="list-style: none; padding: 0;"></ul>
 
 <script>
-const API = "/tasks";  // same origin (important)
+const API = "/tasks";
 
+
+// -------------------------
+// CREATE TASK
+// -------------------------
 async function createTask() {
-    const title = document.getElementById("taskInput").value;
-
-    if (!title) return alert("Enter a task");
-
+    const title =
+        document.getElementById("taskInput").value;
+    if (!title) {
+        alert("Enter a task");
+        return;
+    }
     await fetch(API + "/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title })
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: title
+        })
     });
-
     document.getElementById("taskInput").value = "";
     loadTasks();
 }
 
+// -------------------------
+// LOAD TASKS
+// -------------------------
 async function loadTasks() {
-    const res = await fetch(API + "/");
-    const tasks = await res.json();
-
-    const list = document.getElementById("taskList");
+    const list =
+        document.getElementById("taskList");
+    list.innerHTML = "<p>Loading...</p>";
+    const res =
+        await fetch(API + "/");
+    const tasks =
+        await res.json();
     list.innerHTML = "";
     if (!Array.isArray(tasks)) {
-    console.error(tasks);
-    return;
-}
+        console.error(tasks);
+        return;
+    }
+
     tasks.forEach(task => {
-        const li = document.createElement("li");
+        const li =
+            document.createElement("li");
+        li.style.padding = "12px";
+        li.style.border = "1px solid gray";
+        li.style.marginBottom = "10px";
+        li.style.listStyle = "none";
         li.innerHTML = `
-            [${task.id}] ${task.title}
-            <button onclick="deleteTask(${task.id})">X</button>
-        `;
-        list.appendChild(li);
+    <strong>${task.title}</strong>
+
+    <br>
+
+    Status:
+    ${
+        task.completed
+        ? "✅ Completed"
+        : "❌ Incomplete"
+    }
+
+    <br><br>
+
+    <button onclick="toggleTask(
+        ${task.id},
+        ${task.completed}
+    )">
+        ${
+            task.completed
+            ? "Undo"
+            : "Complete"
+        }
+    </button>
+
+    <button onclick="editTask(
+        ${task.id},
+        '${task.title}'
+    )">
+        Edit
+    </button>
+
+    <button onclick="deleteTask(${task.id})">
+        Delete
+    </button>
+`;
     });
 }
 
+// -------------------------
+// TOGGLE TASK STATUS
+// -------------------------
+async function toggleTask(id, completed) {
+    const newTitle =
+        prompt(
+            "Edit task title:",
+            currentTitle
+        );
+        if (!newTitle) return;
+    await fetch(API + "/" + id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            completed: !completed
+        })
+    });
+    loadTasks();
+}
+
+// -------------------------
+// DELETE TASK
+// -------------------------
 async function deleteTask(id) {
+
     await fetch(API + "/" + id, {
         method: "DELETE"
     });
     loadTasks();
 }
+
+// -------------------------
+// AUTO LOAD TASKS
+// -------------------------
+loadTasks();
 </script>
 
 </body>

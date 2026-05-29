@@ -6,7 +6,14 @@ import httpx
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskResponse
+from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
+from app.services.task_service import (
+    create_task_service,
+    get_tasks_service,
+    get_task_service,
+    delete_task_service,
+    update_task_service
+)
 
 router = APIRouter(
     prefix="/tasks",
@@ -21,11 +28,7 @@ def create_task(
     task: TaskCreate,
     db: Session = Depends(get_db)
 ):
-    new_task = Task(
-        title=task.title,
-        completed=False
-    )
-    db.add(new_task)
+    return create_task_service(db, task)
     db.commit()
     db.refresh(new_task)
     return new_task
@@ -36,8 +39,7 @@ def create_task(
 # -------------------------
 @router.get("/", response_model=List[TaskResponse])
 def get_tasks(db: Session = Depends(get_db)):
-    tasks = db.query(Task).all()
-    return tasks
+    return get_tasks_service(db)
 
 # -------------------------
 # ASYNC NON-BLOCKING ENDPOINT
@@ -100,7 +102,10 @@ def get_task(
     task_id: int,
     db: Session = Depends(get_db)
 ):
-    task = db.query(Task).filter(Task.id == task_id).first()
+    task = get_task_service(
+    db,
+    task_id
+)
     if not task:
         raise HTTPException(
             status_code=404,
@@ -114,14 +119,44 @@ def get_task(
 @router.delete("/{task_id}")
 def delete_task(
     task_id: int,
+    task_data: TaskUpdate,
     db: Session = Depends(get_db)
 ):
-    task = db.query(Task).filter(Task.id == task_id).first()
+    task = get_task_service(
+    db,
+    task_id
+)
     if not task:
         raise HTTPException(
             status_code=404,
             detail="Task not found"
         )
-    db.delete(task)
-    db.commit()
+    delete_task_service(
+    db,
+    task
+)
     return {"message": "Task deleted"}
+
+# -------------------------
+# UPDATE TASK
+# -------------------------
+@router.put("/{task_id}", response_model=TaskResponse)
+def update_task(
+    task_id: int,
+    task_data: TaskUpdate,
+    db: Session = Depends(get_db)
+):
+    task = get_task_service(
+        db,
+        task_id
+    )
+    if not task:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+    return update_task_service(
+        db,
+        task,
+        task_data
+    )
