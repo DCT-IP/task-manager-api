@@ -13,8 +13,8 @@ class TaskCreate(TaskBase):
 # 3. For PATCH /tasks/{id} (Partial Updates)
 class TaskUpdate(BaseModel):
     title: str | None = Field(None, min_length=3, max_length=100)
-    description: str | None = None
-    completed: bool | None = None
+    description: str | None = Field(default=None, description="Detailed description")
+    completed: bool | None = Field(default=None)
 
 # 4. For GET /tasks (API Response)
 class TaskResponse(TaskBase):

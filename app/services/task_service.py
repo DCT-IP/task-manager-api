@@ -43,13 +43,22 @@ def delete_task_service(db: Session, task: Task) -> None:
 # -------------------------
 # UPDATE TASK
 # -------------------------
-def update_task_service(db: Session, task: Task, task_data: TaskUpdate) -> Task:
+def update_task_service(
+    db: Session,
+    task_id: int,
+    task_data: TaskUpdate
+):
+    task = db.query(Task).filter(
+        Task.id == task_id
+    ).first()
+    if not task:
+        return None
     if task_data.title is not None:
         task.title = task_data.title
-    if task_data.completed is not None:
-        task.completed = task_data.completed
     if task_data.description is not None:
         task.description = task_data.description
+    if task_data.completed is not None:
+        task.completed = task_data.completed
     db.commit()
     db.refresh(task)
     return task

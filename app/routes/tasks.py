@@ -94,7 +94,26 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
-
+# -------------------------
+# UPDATE TASK
+# -------------------------
+@router.put("/{task_id}", response_model=TaskResponse)
+def update_task(
+    task_id: int,
+    task_update: TaskUpdate,
+    db: Session = Depends(get_db)
+):
+    task = update_task_service(
+        db,
+        task_id,
+        task_update
+    )
+    if not task:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+    return task
 # -------------------------
 # DELETE TASK
 # -------------------------
@@ -107,15 +126,3 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     
     delete_task_service(db, task)
     return {"message": "Task deleted"}
-
-
-# -------------------------
-# UPDATE TASK
-# -------------------------
-@router.put("/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task_data: TaskUpdate, db: Session = Depends(get_db)):
-    task = get_task_service(db, task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-        
-    return update_task_service(db, task, task_data)
