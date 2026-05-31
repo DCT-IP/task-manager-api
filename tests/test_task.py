@@ -66,3 +66,59 @@ def test_delete_task():
         f"/tasks/{task_id}"
     )
     assert response.status_code == 200
+
+# NEGATIVE TESTS :3
+
+def test_get_nonexistent_task():
+    response = client.get("/tasks/9999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+def test_delete_nonexistent_task():
+    response = client.delete("/tasks/999999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+def test_update_nonexistent_task():
+    response = client.put(
+        "/tasks/999999",
+        json={
+            "title": "Updated"
+        }
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+def test_empty_title():
+    response = client.post(
+        "/tasks/",
+        json={
+            "title": ""
+        }
+    )
+    assert response.status_code == 422
+
+def test_missing_title():
+    response = client.post(
+        "/tasks/",
+        json={}
+    )
+    assert response.status_code == 422
+
+def test_title_too_long():
+    response = client.post(
+        "/tasks/",
+        json={
+            "title": "A" * 101
+        }
+    )
+    assert response.status_code == 422
+
+def test_invalid_title_type():
+    response = client.post(
+        "/tasks/",
+        json={
+            "title": 12345
+        }
+    )
+    assert response.status_code == 422
