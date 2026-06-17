@@ -49,3 +49,9 @@ venv\Scripts\activate      # Windows
 
 ---
 
+## Testing 
+``` bash
+ pytest -v 
+``` 
+
+---

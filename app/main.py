@@ -1,3 +1,4 @@
+import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -5,6 +6,7 @@ from fastapi.responses import FileResponse
 from app.routes.tasks import router as tasks_router
 from app.routes.auth import router as auth_router
 
+from app.logger import logger
 from app.database import engine, Base
 from app.models import user, task   # IMPORTANT: registers models
 from app.config import settings
@@ -15,6 +17,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+    logger.info(
+        f"{request.method}"
+        f"{request.url.path}"
+        f"{response.status_code}"
+        f"{duration:.4f}"
+    )
+    return response
 # -------------------------
 # DATABASE INITIALIZATION
 # -------------------------

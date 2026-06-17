@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
-
+from app.logger import logger
 
 # -------------------------
-# CREATE TASK
+# CREATE TASK AND LOG
 # -------------------------
+logger.info("Creating a new task")
 def create_task_service(db: Session, task_data: TaskCreate) -> Task:
     new_task = Task(
         title=task_data.title,
@@ -13,41 +14,57 @@ def create_task_service(db: Session, task_data: TaskCreate) -> Task:
         completed=False
     )
     db.add(new_task)
-    db.commit()
+    try:
+      db.commit()
+    except Exception as e:
+        logger.exception(f"Failed to create task: {e}")
     db.refresh(new_task)
+    logger.info(f"Task created with ID: {new_task.id}")
     return new_task
 
 
 # -------------------------
-# GET ALL TASKS
+# GET ALL TASKS AND LOG
 # -------------------------
 def get_tasks_service(db: Session) -> list[Task]:
-    return db.query(Task).all()
+    logger.info("Fetching all tasks")
+    tasks = db.query(Task).all()
+    logger.info(f"Retrieved {len(tasks)} tasks")
+    return tasks
 
 
 # -------------------------
-# GET SINGLE TASK
+# GET SINGLE TASK AND LOG
 # -------------------------
 def get_task_service(db: Session, task_id: int) -> Task | None:
-    return db.query(Task).filter(Task.id == task_id).first()
+    logger.info(f"Fetching task with ID: {task_id}")
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if task:
+        logger.info(f"Task found with ID: {task.id}")
+    else:
+        logger.warning(f"Task not found with ID: {task_id}")
+    return task
 
 
 # -------------------------
-# DELETE TASK
+# DELETE TASK AND LOG
 # -------------------------
 def delete_task_service(db: Session, task: Task) -> None:
+    logger.info(f"Deleting task with ID: {task.id}")
     db.delete(task)
     db.commit()
+    logger.info(f"Task deleted with ID: {task.id}")
 
 
 # -------------------------
-# UPDATE TASK
+# UPDATE TASK AND LOG
 # -------------------------
 def update_task_service(
     db: Session,
     task_id: int,
     task_data: TaskUpdate
 ):
+    logger.info(f"Updating task with ID: {task_id}")
     task = db.query(Task).filter(
         Task.id == task_id
     ).first()
@@ -61,4 +78,6 @@ def update_task_service(
         task.completed = task_data.completed
     db.commit()
     db.refresh(task)
+    logger.info(f"Task updated with ID: {task.id}")
     return task
+
