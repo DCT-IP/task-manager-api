@@ -4,11 +4,14 @@ from app.database import get_db
 
 from app.schemas.auth import (
     UserRegister,
-    UserResponse
+    UserResponse,
+    UserLogin,
+    LoginResponse
 )
 
 from app.services.auth_service import (
-    register_user_service
+    register_user_service,
+    login_user_service
 )
 
 router = APIRouter(
@@ -35,3 +38,19 @@ def register_user(
     )
 
     return created_user
+
+@router.post(
+    "/login",
+    response_model = LoginResponse
+)
+def login_user(
+    creds: UserLogin,
+    db: Session = Depends(get_db)
+):
+    login_user_service(
+        db = db,
+        username = creds.username,
+        password = creds.password
+    )
+
+    return {"message": "Login successful"}
