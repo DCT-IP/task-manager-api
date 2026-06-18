@@ -4,3 +4,6 @@ sqlalchemy
 pymysql
 pytest
 httpx
+passlib
+bcrypt==4.3.0
+pydantic[email]
