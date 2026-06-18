@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 
 from app.routes.tasks import router as tasks_router
 from app.routes.auth import router as auth_router
+from app.routes.auth import router as auth_router
 
 from app.logger import logger
 from app.database import engine, Base
@@ -50,7 +51,6 @@ app.add_middleware(
 # -------------------------
 app.include_router(tasks_router)
 app.include_router(auth_router)
-
 # -------------------------
 # HEALTH CHECK
 # -------------------------

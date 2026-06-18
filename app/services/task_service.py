@@ -80,4 +80,3 @@ def update_task_service(
     db.refresh(task)
     logger.info(f"Task updated with ID: {task.id}")
     return task
-

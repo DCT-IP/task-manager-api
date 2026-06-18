@@ -1,10 +1,37 @@
-from fastapi import APIRouter
-#this a mock router for the auth system
-router = APIRouter(prefix="/auth", tags=["Auth"])
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
 
-@router.get("/")
-def auth_check():
-    return {"message": "Auth route working"}
+from app.schemas.auth import (
+    UserRegister,
+    UserResponse
+)
+
+from app.services.auth_service import (
+    register_user_service
+)
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["Auth"]
+)
 
 
-#prefix makes it such that whatever is written in the file will automatically start with /auth
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=201
+)
+def register_user(
+    user: UserRegister,
+    db: Session = Depends(get_db)
+):
+
+    created_user = register_user_service(
+        db=db,
+        username=user.username,
+        email=user.email,
+        password=user.password
+    )
+
+    return created_user
