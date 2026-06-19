@@ -7,10 +7,11 @@ from app.logger import logger
 # CREATE TASK AND LOG
 # -------------------------
 logger.info("Creating a new task")
-def create_task_service(db: Session, task_data: TaskCreate) -> Task:
+def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Task:
     new_task = Task(
         title=task_data.title,
         description=task_data.description,
+        owner_id=owner_id,
         completed=False
     )
     db.add(new_task)

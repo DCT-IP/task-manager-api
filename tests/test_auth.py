@@ -1,9 +1,10 @@
 from fastapi.testclient import TestClient
 from app.main import app
 import uuid
+
 client = TestClient(app)
 
-#Registration Test
+
 def test_register_user():
 
     response = client.post(
@@ -17,10 +18,12 @@ def test_register_user():
 
     assert response.status_code == 201
 
-#login success 
+
 def test_login_success():
+
     username = f"loginuser{uuid.uuid4().hex[:8]}"
     email = f"{username}@test.com"
+
     client.post(
         "/auth/register",
         json={
@@ -32,21 +35,22 @@ def test_login_success():
 
     response = client.post(
         "/auth/login",
-        json={
+        data={
             "username": username,
             "password": "secret123"
         }
     )
 
     assert response.status_code == 200
+    assert "access_token" in response.json()
 
-#login failure
+
 def test_login_failure():
 
     response = client.post(
         "/auth/login",
-        json={
-            "username": "loginuser",
+        data={
+            "username": "doesnotexist",
             "password": "wrongpassword"
         }
     )

@@ -5,6 +5,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
+from app.dependencies.auth import get_current_user
 from app.database import get_db
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
@@ -25,8 +26,8 @@ router = APIRouter(
 # CREATE TASK
 # -------------------------
 @router.post("/", response_model=TaskResponse, status_code=201)
-def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    return create_task_service(db, task)
+def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    return create_task_service(db, task, owner_id=current_user["user_id"])
 
 
 # -------------------------
@@ -126,3 +127,4 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     
     delete_task_service(db, task)
     return {"message": "Task deleted"}
+

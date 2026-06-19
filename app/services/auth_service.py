@@ -28,21 +28,25 @@ def register_user_service(
 # -------------------------
 def login_user_service(
         db: Session,
-        username: str, 
+        username: str,
         password: str
-): 
-        user = (
-                db.query(User)
-                .filter(User.username == username)
-                .first()
+):
+    user = (
+        db.query(User)
+        .filter(User.username == username)
+        .first()
+    )
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
         )
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        if not verify_pswd(password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid password")
-
-        return user
+    if not verify_pswd(password, user.password_hash):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+    return user
 # post /auth/reg
 #      |
 #      |
