@@ -59,7 +59,7 @@ def root():
     return {"message": "API is running"}
 
 # -------------------------
-# SIMPLE FRONTEND (optional)
+# SIMPLE FRONTEND
 # -------------------------
 @app.get("/ui")
 def serve_ui():
@@ -70,3 +70,8 @@ def debug_tasks():
     from app.database import SessionLocal
     db = SessionLocal()
     return db.query(task.Task).all()
+
+
+
+# youruser
+# secret123
