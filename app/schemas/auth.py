@@ -24,3 +24,8 @@ class UserLogin(BaseModel):
 #4. Login Respone
 class LoginResponse(BaseModel):
     message: str
+
+#5. Token Response 
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str

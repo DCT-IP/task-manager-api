@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 
 from app.schemas.auth import (
+    TokenResponse,
     UserRegister,
     UserResponse,
     UserLogin,
@@ -14,12 +15,15 @@ from app.services.auth_service import (
     login_user_service
 )
 
+from app.core.JWT_handler import create_access_token
+
 router = APIRouter(
     prefix="/auth",
     tags=["Auth"]
 )
 
 
+#register route
 @router.post(
     "/register",
     response_model=UserResponse,
@@ -39,18 +43,29 @@ def register_user(
 
     return created_user
 
+
+#Login route
 @router.post(
     "/login",
-    response_model = LoginResponse
+    response_model = TokenResponse
 )
 def login_user(
     creds: UserLogin,
     db: Session = Depends(get_db)
 ):
-    login_user_service(
+    user = login_user_service(
         db = db,
         username = creds.username,
         password = creds.password
     )
+    token = create_access_token(
+        data = {"sub": user.username,
+                "user_id": user.id
+                }
+    )
 
-    return {"message": "Login successful"}
+    return {
+    "access_token": token,
+    "token_type": "bearer"
+}
+
