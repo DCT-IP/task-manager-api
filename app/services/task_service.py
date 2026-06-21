@@ -27,10 +27,11 @@ def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Ta
 # -------------------------
 # GET ALL TASKS AND LOG
 # -------------------------
-def get_tasks_service(db: Session) -> list[Task]:
-    logger.info("Fetching all tasks")
-    tasks = db.query(Task).all()
-    logger.info(f"Retrieved {len(tasks)} tasks")
+def get_tasks_service(db: Session,
+                      user_id: int) -> list[Task]:
+    logger.info(f"Fetching all tasks for {user_id}")
+    tasks = db.query(Task).filter(Task.owner_id == user_id).all()
+    logger.info(f"Retrieved {len(tasks)} tasks for {user_id}")
     return tasks
 
 

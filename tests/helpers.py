@@ -36,3 +36,32 @@ def get_auth_headers():
     return {
         "Authorization": f"Bearer {token}"
     }
+
+
+def create_user_and_login():
+
+    username = f"user_{uuid.uuid4().hex[:8]}"
+    email = f"{uuid.uuid4().hex[:8]}@test.com"
+
+    client.post(
+        "/auth/register",
+        json={
+            "username": username,
+            "email": email,
+            "password": "secret123"
+        }
+    )
+
+    login = client.post(
+        "/auth/login",
+        data={
+            "username": username,
+            "password": "secret123"
+        }
+    )
+
+    token = login.json()["access_token"]
+
+    return {
+        "Authorization": f"Bearer {token}"
+    }

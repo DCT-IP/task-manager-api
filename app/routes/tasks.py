@@ -34,8 +34,10 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: s
 # GET ALL TASKS
 # -------------------------
 @router.get("/", response_model=List[TaskResponse])
-def get_tasks(db: Session = Depends(get_db)):
-    return get_tasks_service(db)
+def get_tasks(db: Session = Depends(get_db),
+              current_user: str = Depends(get_current_user)):
+    return get_tasks_service(db,
+                             user_id=current_user["user_id"])
 
 
 # -------------------------
@@ -89,10 +91,26 @@ async def multi_external():
 # GET SINGLE TASK
 # -------------------------
 @router.get("/{task_id}", response_model=TaskResponse)
-def get_task(task_id: int, db: Session = Depends(get_db)):
+def get_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+
     task = get_task_service(db, task_id)
+
     if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
+    if task.owner_id != current_user["user_id"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized"
+        )
+
     return task
 
 # -------------------------
@@ -102,29 +120,47 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
 def update_task(
     task_id: int,
     task_update: TaskUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
 ):
-    task = update_task_service(
-        db,
-        task_id,
-        task_update
-    )
+    task = get_task_service(db, task_id)
     if not task:
         raise HTTPException(
             status_code=404,
             detail="Task not found"
         )
-    return task
+    if task.owner_id != current_user["user_id"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized"
+        )
+    return update_task_service(
+        db,
+        task_id,
+        task_update
+    )
 # -------------------------
 # DELETE TASK
 # -------------------------
 # FIXED: Removed the unnecessary task_data payload requirement
 @router.delete("/{task_id}", status_code=200)
-def delete_task(task_id: int, db: Session = Depends(get_db)):
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
     task = get_task_service(db, task_id)
     if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+    if task.owner_id != current_user["user_id"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized"
+        )
     delete_task_service(db, task)
-    return {"message": "Task deleted"}
-
+    return {
+        "message": "Task deleted"
+    }
