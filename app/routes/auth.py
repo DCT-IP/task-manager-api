@@ -1,14 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.database import get_db
 
+from app.database import get_db
+from app.core.rate_limiting import limiter
 from app.schemas.auth import (
     TokenResponse,
     UserRegister,
     UserResponse,
-    UserLogin,
-    LoginResponse
 )
 
 from app.services.auth_service import (
@@ -25,17 +24,18 @@ router = APIRouter(
 )
 
 
-#register route
+# Register route
 @router.post(
     "/register",
     response_model=UserResponse,
     status_code=201
 )
+@limiter.limit("3/minute")
 def register_user(
+    request: Request,
     user: UserRegister,
     db: Session = Depends(get_db)
 ):
-
     created_user = register_user_service(
         db=db,
         username=user.username,
@@ -46,38 +46,41 @@ def register_user(
     return created_user
 
 
-#Login route
+# Login route
 @router.post(
     "/login",
     response_model=TokenResponse
 )
+@limiter.limit("5/minute")
 def login_user(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
     user = login_user_service(
-    db=db,
-    username=form_data.username,
-    password=form_data.password
+        db=db,
+        username=form_data.username,
+        password=form_data.password
     )
+
     token = create_access_token(
-        data = {"sub": user.username,
-                "user_id": user.id
-                }
+        data={
+            "sub": user.username,
+            "user_id": user.id
+        }
     )
 
     return {
-    "access_token": token,
-    "token_type": "bearer"
-}
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 
-
-# protected path
+# Protected route
 @router.get("/me")
+@limiter.limit("60/minute")
 def get_me(
+    request: Request,
     current_user=Depends(get_current_user)
 ):
-    print("Ai")
     return current_user
-

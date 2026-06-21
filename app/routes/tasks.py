@@ -1,13 +1,14 @@
 import asyncio
 import time
 from typing import List
+
 import httpx
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.core.rate_limiting import limiter
 from app.dependencies.auth import get_current_user
 from app.database import get_db
-from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
 from app.services.task_service import (
     create_task_service,
@@ -25,19 +26,39 @@ router = APIRouter(
 # -------------------------
 # CREATE TASK
 # -------------------------
-@router.post("/", response_model=TaskResponse, status_code=201)
-def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-    return create_task_service(db, task, owner_id=current_user["user_id"])
+@router.post(
+    "/",
+    response_model=TaskResponse,
+    status_code=201
+)
+@limiter.limit("20/minute")
+def create_task(
+    request: Request,
+    task: TaskCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    return create_task_service(
+        db,
+        task,
+        owner_id=current_user["user_id"]
+    )
 
 
 # -------------------------
 # GET ALL TASKS
 # -------------------------
 @router.get("/", response_model=List[TaskResponse])
-def get_tasks(db: Session = Depends(get_db),
-              current_user: str = Depends(get_current_user)):
-    return get_tasks_service(db,
-                             user_id=current_user["user_id"])
+@limiter.limit("60/minute")
+def get_tasks(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    return get_tasks_service(
+        db,
+        user_id=current_user["user_id"]
+    )
 
 
 # -------------------------
@@ -49,8 +70,11 @@ async def slow_endpoint():
     for i in range(5):
         print(f"working {i}")
         await asyncio.sleep(1)
+
     print("END")
-    return {"message": "Async endpoint completed"}
+    return {
+        "message": "Async endpoint completed"
+    }
 
 
 # -------------------------
@@ -59,45 +83,77 @@ async def slow_endpoint():
 @router.get("/blocking")
 def blocking_endpoint():
     print("Blocking request started")
-    time.sleep(5)  # Runs safely in a thread pool because this is a standard 'def'
+
+    time.sleep(5)
+
     print("Blocking request finished")
-    return {"message": "Blocking endpoint completed"}
+
+    return {
+        "message": "Blocking endpoint completed"
+    }
 
 
 # -------------------------
 # EXTERNAL API CALL
 # -------------------------
 @router.get("/external")
-async def external_api_test():
+@limiter.limit("30/minute")
+async def external_api_test(
+    request: Request
+):
     async with httpx.AsyncClient() as client:
-        response = await client.get("https://jsonplaceholder.typicode.com/todos/1")
-    return {"external_data": response.json()}
+        response = await client.get(
+            "https://jsonplaceholder.typicode.com/todos/1"
+        )
+
+    return {
+        "external_data": response.json()
+    }
 
 
+# -------------------------
+# MULTIPLE EXTERNAL API CALLS
+# -------------------------
 @router.get("/multi-external")
-async def multi_external():
+@limiter.limit("20/minute")
+async def multi_external(
+    request: Request
+):
     async with httpx.AsyncClient() as client:
         tasks = [
-            client.get(f"https://jsonplaceholder.typicode.com/todos/{i}") 
+            client.get(
+                f"https://jsonplaceholder.typicode.com/todos/{i}"
+            )
             for i in range(1, 6)
         ]
+
         responses = await asyncio.gather(*tasks)
-    
-    results = [response.json() for response in responses]
-    return {"results": results}
+
+    results = [
+        response.json()
+        for response in responses
+    ]
+
+    return {
+        "results": results
+    }
 
 
 # -------------------------
 # GET SINGLE TASK
 # -------------------------
 @router.get("/{task_id}", response_model=TaskResponse)
+@limiter.limit("60/minute")
 def get_task(
+    request: Request,
     task_id: int,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-
-    task = get_task_service(db, task_id)
+    task = get_task_service(
+        db,
+        task_id
+    )
 
     if not task:
         raise HTTPException(
@@ -113,54 +169,76 @@ def get_task(
 
     return task
 
+
 # -------------------------
 # UPDATE TASK
 # -------------------------
 @router.put("/{task_id}", response_model=TaskResponse)
+@limiter.limit("20/minute")
 def update_task(
+    request: Request,
     task_id: int,
     task_update: TaskUpdate,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-    task = get_task_service(db, task_id)
+    task = get_task_service(
+        db,
+        task_id
+    )
+
     if not task:
         raise HTTPException(
             status_code=404,
             detail="Task not found"
         )
+
     if task.owner_id != current_user["user_id"]:
         raise HTTPException(
             status_code=403,
             detail="Not authorized"
         )
+
     return update_task_service(
         db,
         task_id,
         task_update
     )
+
+
 # -------------------------
 # DELETE TASK
 # -------------------------
-# FIXED: Removed the unnecessary task_data payload requirement
 @router.delete("/{task_id}", status_code=200)
+@limiter.limit("20/minute")
 def delete_task(
+    request: Request,
     task_id: int,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-    task = get_task_service(db, task_id)
+    task = get_task_service(
+        db,
+        task_id
+    )
+
     if not task:
         raise HTTPException(
             status_code=404,
             detail="Task not found"
         )
+
     if task.owner_id != current_user["user_id"]:
         raise HTTPException(
             status_code=403,
             detail="Not authorized"
         )
-    delete_task_service(db, task)
+
+    delete_task_service(
+        db,
+        task
+    )
+
     return {
         "message": "Task deleted"
     }

@@ -12,11 +12,24 @@ from app.database import engine, Base
 from app.models import user, task   # IMPORTANT: registers models
 from app.config import settings
 
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi import _rate_limit_exceeded_handler
+
+from app.core.rate_limiting import limiter
+
 app = FastAPI(
     title=settings.APP_NAME,
     description="Simple API for managing tasks",
     version="1.0.0"
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
+app.add_middleware(SlowAPIMiddleware)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
