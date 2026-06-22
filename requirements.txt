@@ -7,5 +7,7 @@ httpx
 passlib
 bcrypt==4.3.0
 pydantic[email]
+pydantic-settings
 python-jose[cryptography]
 python-multipart
+slowapi

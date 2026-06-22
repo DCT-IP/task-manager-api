@@ -87,7 +87,9 @@ def debug_tasks():
     db = SessionLocal()
     return db.query(task.Task).all()
 
-
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 # youruser
 # secret123
