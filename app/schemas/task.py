@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 # 1. Base Shared Fields
 class TaskBase(BaseModel):
@@ -39,7 +39,7 @@ class TaskResponse(TaskBase):
     id: int
     completed: bool
     created_at: datetime
-    owner_id: int  | None = None
-
-    class Config:
-        from_attributes = True
+    owner_id: int | None = None
+    model_config = ConfigDict(
+        from_attributes=True
+    )
