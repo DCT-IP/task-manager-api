@@ -6,9 +6,7 @@ client = TestClient(app)
 
 
 def test_task_has_owner():
-
     headers = get_auth_headers()
-
     response = client.post(
         "/tasks/",
         json={
@@ -16,9 +14,6 @@ def test_task_has_owner():
         },
         headers=headers
     )
-
     assert response.status_code == 201
-
     task = response.json()
-
     assert task["owner_id"] is not None

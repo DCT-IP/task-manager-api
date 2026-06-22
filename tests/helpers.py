@@ -15,7 +15,7 @@ def get_auth_headers():
         json={
             "username": username,
             "email": email,
-            "password": "secret123"
+            "password": "Password123!"
         }
     )
 
@@ -25,7 +25,7 @@ def get_auth_headers():
         "/auth/login",
         data={
             "username": username,
-            "password": "secret123"
+            "password": "Password123!"
         }
     )
 
@@ -48,7 +48,7 @@ def create_user_and_login():
         json={
             "username": username,
             "email": email,
-            "password": "secret123"
+            "password": "Password123!"
         }
     )
 
@@ -56,7 +56,7 @@ def create_user_and_login():
         "/auth/login",
         data={
             "username": username,
-            "password": "secret123"
+            "password": "Password123!"
         }
     )
 
