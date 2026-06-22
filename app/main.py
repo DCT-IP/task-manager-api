@@ -15,7 +15,9 @@ from app.config import settings
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi import _rate_limit_exceeded_handler
-
+from app.middleware.security_headers import (
+    SecurityHeadersMiddleware
+)
 from app.core.rate_limiting import limiter
 
 app = FastAPI(
@@ -30,6 +32,7 @@ app.add_exception_handler(
     _rate_limit_exceeded_handler
 )
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 @app.middleware("http")
 async def log_requests(request, call_next):
