@@ -40,8 +40,27 @@ This project is part of a backend engineering roadmap focused on API development
 ### DevOps
 
 * Dockerized Application
+* Docker Compose Orchestration
+* GitHub Actions CI
 * Environment Variable Configuration
 * Automated Test Suite
+
+### CI/CD
+
+* This project uses GitHub Actions for Continuous Integration.
+
+* On every push and pull request to `main`:
+
+  - A MySQL service container is started
+  - Environment variables are injected
+  - Alembic migrations are applied
+  - Automated tests are executed using Pytest
+
+* This ensures changes are validated automatically before being merged.
+
+* Workflow location:
+
+.github/workflows/ci.yml
 
 ---
 
@@ -75,6 +94,7 @@ This project is part of a backend engineering roadmap focused on API development
 
 * Docker
 * Docker Compose
+* GitHub Actions
 
 ---
 
@@ -258,7 +278,26 @@ This project is being used to learn:
 * Background Tasks
 
 ---
+## Completed:
 
+* FastAPI
+* REST API Design
+* Authentication & Authorization
+* SQLAlchemy ORM
+* Database Migrations
+* Docker
+* Testing
+* CI
+
+---
+## Currently Exploring:
+
+* Redis Caching
+* Async Programming
+* Background Tasks
+* Deployment/CD
+
+---
 ## License
 
 This project is licensed under the MIT License.
