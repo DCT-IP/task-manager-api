@@ -1,43 +1,81 @@
-# Python cache
+# =========================
+# Python
+# =========================
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 *$py.class
 
-# Virtual environment
+# =========================
+# Virtual Environments
+# =========================
 venv/
-.env/
+.venv/
+env/
 
-# Environment variables
+# =========================
+# Environment Variables
+# =========================
 .env
+.env.*
+!.env.example
 
-# VS Code
-.vscode/
-
-# OS files
-.DS_Store
-Thumbs.db
-
+# =========================
 # Logs
+# =========================
 *.log
+app.log
 
-# Database
-*.db
-*.sqlite3
-
-# Test cache
+# =========================
+# Testing
+# =========================
 .pytest_cache/
-
-# Coverage reports
 .coverage
 htmlcov/
 
-# Build files
-dist/
+# =========================
+# Type Checkers / Linters
+# =========================
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# Build Artifacts
+# =========================
 build/
+dist/
 *.egg-info/
 
-# Jupyter Notebook
+# =========================
+# Databases
+# =========================
+*.db
+*.sqlite3
+
+# =========================
+# Jupyter
+# =========================
 .ipynb_checkpoints/
 
-# FastAPI specific (optional)
-*.sqlite3
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Operating System Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Docker
+# =========================
+mysql_data/
+
+# =========================
+# Alembic
+# =========================
+alembic/__pycache__/

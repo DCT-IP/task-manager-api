@@ -1,57 +1,264 @@
 # Task Manager API
 
-A simple REST API built using FastAPI to manage tasks.  
-This project is part of a backend learning roadmap focusing on API design, async programming, and database integration.
+A production-oriented REST API built with FastAPI for task management.
+
+This project is part of a backend engineering roadmap focused on API development, security, testing, database management, and DevOps practices.
 
 ---
 
 ## Features
 
-- Create tasks
-- Get all tasks
-- Get a task by ID
-- Delete tasks
-- Auto-generated API documentation (Swagger)
+### Task Management
+
+* Create tasks
+* Retrieve all tasks
+* Retrieve a task by ID
+* Update tasks
+* Delete tasks
+
+### Authentication & Authorization
+
+* JWT Authentication
+* User Registration & Login
+* Protected Endpoints
+* Task Ownership Enforcement
+
+### Security
+
+* Password Hashing
+* Rate Limiting
+* Security Headers
+* Input Validation
+* Validation Hardening
+
+### Database
+
+* MySQL Integration
+* SQLAlchemy ORM
+* Alembic Database Migrations
+
+### DevOps
+
+* Dockerized Application
+* Environment Variable Configuration
+* Automated Test Suite
 
 ---
 
 ## Tech Stack
 
-- FastAPI
-- Uvicorn
-- sqlalchemy 
-- pymysql
+### Backend
 
+* FastAPI
+* Uvicorn
+* SQLAlchemy
+* PyMySQL
+* Pydantic
+
+### Security
+
+* Passlib
+* bcrypt
+* python-jose
+
+### Database
+
+* MySQL
+* Alembic
+
+### Testing
+
+* Pytest
+* HTTPX
+
+### DevOps
+
+* Docker
+* Docker Compose
 
 ---
 
+## Project Structure
 
-##  Running the Project
+```text
+task-manager-api/
+│
+├── app/
+│   ├── core/
+│   ├── dependencies/
+│   ├── models/
+│   ├── routes/
+│   ├── schemas/
+│   ├── services/
+│   └── main.py
+│
+├── tests/
+├── alembic/
+├── docs/
+│
+├── Dockerfile
+├── docker-compose.yml
+├── alembic.ini
+├── requirements.txt
+├── .env.example
+└── README.md
+```
 
-1. Clone the repo:
+---
+
+## Local Setup
+
+### Clone Repository
+
 ```bash
-git clone <your-repo-link>
+git clone <repository-url>
 cd task-manager-api
 ```
 
-2.Create venv
-```python
+### Create Virtual Environment
+
+Windows:
+
+```bash
 python -m venv venv
+venv\Scripts\activate
 ```
-source venv/bin/activate   # Linux/Mac
-venv\Scripts\activate      # Windows
 
-3.Install required dependencies
- pip install
+Linux / Mac:
 
-4.Run server
- uvicorn app.main:app --reload
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Configure Environment Variables
+
+Create a `.env` file using `.env.example`.
+
+Example:
+
+```env
+APP_NAME=Task Manager API
+
+DATABASE_URL=mysql+pymysql://api_user:password@localhost:3306/taskdb
+
+SECRET_KEY=your-secret-key
+
+ALGORITHM=HS256
+
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+### Run Application
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Application:
+
+```text
+http://localhost:8000
+```
+
+Swagger Documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+ReDoc Documentation:
+
+```text
+http://localhost:8000/redoc
+```
 
 ---
 
-## Testing 
-``` bash
- pytest -v 
-``` 
+## Docker Setup
+
+Build and run:
+
+```bash
+docker compose up --build
+```
+
+Stop containers:
+
+```bash
+docker compose down
+```
 
 ---
+
+## Database Migrations
+
+Create migration:
+
+```bash
+alembic revision --autogenerate -m "migration_name"
+```
+
+Apply migration:
+
+```bash
+alembic upgrade head
+```
+
+Check migration status:
+
+```bash
+alembic current
+```
+
+---
+
+## Testing
+
+Run all tests:
+
+```bash
+pytest -v
+```
+
+Current test coverage includes:
+
+* Authentication
+* Authorization
+* Task Ownership
+* CRUD Operations
+* Rate Limiting
+* Security Headers
+* Input Validation
+* Validation Hardening
+
+---
+
+## Learning Goals
+
+This project is being used to learn:
+
+* FastAPI
+* REST API Design
+* Authentication & Authorization
+* Secure Backend Development
+* SQLAlchemy ORM
+* Database Migrations
+* Docker
+* Testing
+* CI/CD
+* Redis Caching
+* Async Programming
+* Background Tasks
+
+---
+
+## License
+
+This project is licensed under the MIT License.
