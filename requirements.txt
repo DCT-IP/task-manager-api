@@ -11,3 +11,4 @@ pydantic-settings
 python-jose[cryptography]
 python-multipart
 slowapi
+alembic
