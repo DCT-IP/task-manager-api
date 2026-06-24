@@ -5,12 +5,11 @@ from fastapi.responses import FileResponse
 
 from app.routes.tasks import router as tasks_router
 from app.routes.auth import router as auth_router
-from app.routes.auth import router as auth_router
 
 from app.logger import logger
 from app.database import engine, Base
 from app.models import user, task   # IMPORTANT: registers models
-from app.config import settings
+from app.core.config import settings
 
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -46,10 +45,6 @@ async def log_requests(request, call_next):
         f"{duration:.4f}"
     )
     return response
-# -------------------------
-# DATABASE INITIALIZATION
-# -------------------------
-Base.metadata.create_all(bind=engine)
 
 # -------------------------
 # CORS MIDDLEWARE
@@ -81,15 +76,7 @@ def root():
 def serve_ui():
     return FileResponse("app/frontend/index.html")
 
-@app.get("/debug/tasks")
-def debug_tasks():
-    from app.database import SessionLocal
-    db = SessionLocal()
-    return db.query(task.Task).all()
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-# youruser
-# secret123
