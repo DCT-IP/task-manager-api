@@ -6,7 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.database import Base
-import app.models
+import app.models.user
+import app.models.task
 from app.core.config import settings
 
 # this is the Alembic Config object, which provides

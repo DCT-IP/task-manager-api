@@ -93,8 +93,9 @@ This project is part of a backend engineering roadmap focused on API development
 ### DevOps
 
 * Docker
-* Docker Compose
-* GitHub Actions
+* GitHub Actions CI
+* Render Deployment
+* Railway MySQL
 
 ---
 
@@ -260,6 +261,16 @@ Current test coverage includes:
 
 ---
 
+## Deployment
+
+Production API:
+https://task-manager-api-cvf6.onrender.com
+
+Interactive API Documentation:
+https://task-manager-api-cvf6.onrender.com/docs
+
+---
+
 ## Learning Goals
 
 This project is being used to learn:
@@ -288,6 +299,7 @@ This project is being used to learn:
 * Docker
 * Testing
 * CI
+* Deployment/CD
 
 ---
 ## Currently Exploring:
@@ -295,7 +307,6 @@ This project is being used to learn:
 * Redis Caching
 * Async Programming
 * Background Tasks
-* Deployment/CD
 
 ---
 ## License
