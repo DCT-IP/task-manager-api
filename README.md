@@ -2,6 +2,14 @@
 
 A high-performance, asynchronous REST API built with FastAPI, engineered for secure task operations, enterprise-grade observability, and automated infrastructure deployment. 
 
+[![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
+[![Framework](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![CI Pipeline](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF.svg?style=flat-square&logo=github-actions&logoColor=white)](https://github.com)
+[![Deployment](https://img.shields.io/badge/Deployed%20On-Render-46E3B7.svg?style=flat-square&logo=render&logoColor=white)](https://render.com)
+[![Database](https://img.shields.io/badge/Database-MySQL%20%7C%20SQLAlchemy-00758F.svg?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com)
+[![Cache](https://img.shields.io/badge/Cache-Redis-DC382D.svg?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
 This system serves as a showcase of advanced backend engineering practices, focusing on system architecture design, distributed caching, containerized orchestration, and rigorous continuous integration (CI) pipelines.
 
 ---
