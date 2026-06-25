@@ -8,7 +8,7 @@ client = TestClient(app)
 def test_task_has_owner():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Owned Task"
         },

@@ -1,0 +1,187 @@
+:root {
+    --bg-color: #fcfbf9; /* Warm parchment */
+    --text-main: #1a1a1a;
+    --text-muted: #555555;
+    --border-heavy: #1a1a1a;
+    --border-light: #dddddd;
+    --live-color: #116611;
+    --bad-color: #aa1111;
+    --terminal-bg: #111111;
+    --terminal-text: #44dd44;
+}
+
+/* Dark / Binary Terminal Theme override */
+body.dark-theme {
+    --bg-color: #0d0e10; /* Pure deep slate black */
+    --text-main: #f0f0f0;
+    --text-muted: #888888;
+    --border-heavy: #f0f0f0;
+    --border-light: #333333;
+    --live-color: #33cc33;
+    --bad-color: #ff3333;
+    --terminal-bg: #000000;
+    --terminal-text: #33ff33;
+}
+
+body {
+    font-family: ui-monospace, "Courier New", Courier, Monaco, Consolas, monospace;
+    margin: 0;
+    padding: 50px 20px;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.container {
+    max-width: 780px;
+    margin: auto;
+}
+
+header {
+    margin-bottom: 40px;
+    border-bottom: 4px double var(--border-heavy);
+    padding-bottom: 24px;
+    position: relative;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.05em;
+}
+
+.description {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 0 0 24px 0;
+}
+
+.api-status-wrapper {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    margin: 32px 0 16px 0;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--border-heavy);
+    letter-spacing: 0.05em;
+}
+
+.data-table {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    position: relative;
+}
+
+.data-row::before {
+    content: "................................................................................................................................................................";
+    position: absolute;
+    left: 0;
+    right: 0;
+    color: var(--border-light);
+    z-index: 1;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.data-label {
+    color: var(--text-muted);
+    padding-right: 8px;
+    background: var(--bg-color);
+    position: relative;
+    z-index: 2;
+}
+
+.data-value {
+    font-weight: bold;
+    padding-left: 8px;
+    background: var(--bg-color);
+    position: relative;
+    z-index: 2;
+}
+
+.status-text { font-weight: bold; }
+.status-text.loading { color: var(--text-muted); }
+.status-text.live { color: var(--live-color); }
+.status-text.bad { color: var(--bad-color); }
+
+/* Buttons Controls */
+.controls-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+button.action-btn {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    border: 2px solid var(--border-heavy);
+    padding: 8px 18px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0px var(--border-heavy);
+    transition: all 0.1s ease;
+}
+
+button.action-btn:hover {
+    background-color: var(--text-main);
+    color: var(--bg-color);
+    box-shadow: 0px 0px 0px var(--border-heavy);
+    transform: translate(3px, 3px);
+}
+
+/* Theme Toggle Anchor Placement top right */
+.theme-toggle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+/* Logs */
+.terminal-log {
+    background: var(--terminal-bg);
+    color: var(--terminal-text);
+    font-size: 0.8rem;
+    padding: 12px;
+    border-radius: 4px;
+    height: 90px;
+    overflow-y: hidden;
+    margin-top: 32px;
+    border: 1px solid var(--border-heavy);
+}
+.log-entry { margin: 2px 0; }
+
+footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border-heavy);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+}
+
+footer a {
+    color: var(--text-main);
+    text-decoration: underline;
+    font-weight: bold;
+}
+footer a:hover {
+    background: var(--text-main);
+    color: var(--bg-color);
+}

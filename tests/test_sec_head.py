@@ -5,7 +5,7 @@ client = TestClient(app)
 
 
 def test_security_headers():
-    response = client.get("/health")
+    response = client.get("/api/v1/health")
     assert response.headers["X-Content-Type-Options"] == "nosniff"
     assert response.headers["X-Frame-Options"] == "DENY"
     assert (

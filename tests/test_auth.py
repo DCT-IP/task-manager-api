@@ -7,7 +7,7 @@ client = TestClient(app)
 
 def test_register_user():
     response = client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": f"user_{uuid.uuid4().hex[:8]}",
             "email": f"test{uuid.uuid4()}@test.com",
@@ -23,7 +23,7 @@ def test_login_success():
     username = f"loginuser{uuid.uuid4().hex[:8]}"
     email = f"{username}@test.com"
     client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": username,
             "email": email,
@@ -31,7 +31,7 @@ def test_login_success():
         }
     )
     response = client.post(
-        "/auth/login",
+        "/api/v1/auth/login",
         data={
             "username": username,
             "password": "Password123!"
@@ -43,7 +43,7 @@ def test_login_success():
 
 def test_login_failure():
     response = client.post(
-        "/auth/login",
+        "/api/v1/auth/login",
         data={
             "username": "doesnotexist",
             "password": "wrongpassword"
@@ -53,7 +53,7 @@ def test_login_failure():
 
 def test_short_username():
     response = client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": "ab",
             "email": f"{uuid.uuid4().hex}@test.com",
@@ -65,7 +65,7 @@ def test_short_username():
 
 def test_whitespace_username():
     response = client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": "     ",
             "email": f"{uuid.uuid4().hex}@test.com",
@@ -77,7 +77,7 @@ def test_whitespace_username():
 
 def test_weak_password():
     response = client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": f"user_{uuid.uuid4().hex[:8]}",
             "email": f"{uuid.uuid4().hex}@test.com",
@@ -88,7 +88,7 @@ def test_weak_password():
 
 def test_invalid_email():
     response = client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": "testuser",
             "email": "not-an-email",

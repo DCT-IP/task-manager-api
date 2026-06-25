@@ -8,7 +8,7 @@ client = TestClient(app)
 def test_create_task():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Test Task"
         },
@@ -23,7 +23,7 @@ def test_create_task():
 def test_get_task():
     headers = get_auth_headers()
     response = client.get(
-        "/tasks/",
+        "/api/v1/tasks/",
         headers=headers
     )
     assert response.status_code == 200
@@ -33,7 +33,7 @@ def test_get_task():
 def test_get_single_task():
     headers = get_auth_headers()
     created = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Single Task"
         },
@@ -41,7 +41,7 @@ def test_get_single_task():
     )
     task_id = created.json()["id"]
     response = client.get(
-        f"/tasks/{task_id}",
+        f"/api/v1/tasks/{task_id}",
         headers=headers
     )
     assert response.status_code == 200
@@ -51,7 +51,7 @@ def test_get_single_task():
 def test_update_task():
     headers = get_auth_headers()
     created = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Old Title"
         },
@@ -59,7 +59,7 @@ def test_update_task():
     )
     task_id = created.json()["id"]
     response = client.put(
-        f"/tasks/{task_id}",
+        f"/api/v1/tasks/{task_id}",
         json={
             "title": "New Title",
             "completed": True
@@ -75,7 +75,7 @@ def test_update_task():
 def test_delete_task():
     headers = get_auth_headers()
     created = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Delete Me"
         },
@@ -83,7 +83,7 @@ def test_delete_task():
     )
     task_id = created.json()["id"]
     response = client.delete(
-        f"/tasks/{task_id}",
+        f"/api/v1/tasks/{task_id}",
         headers=headers
     )
     assert response.status_code == 200
@@ -92,7 +92,7 @@ def test_delete_task():
 def test_get_nonexistent_task():
     headers = get_auth_headers()
     response = client.get(
-        "/tasks/9999",
+        "/api/v1/tasks/9999",
         headers=headers
     )
     assert response.status_code == 404
@@ -101,7 +101,7 @@ def test_get_nonexistent_task():
 def test_delete_nonexistent_task():
     headers = get_auth_headers()
     response = client.delete(
-        "/tasks/999999",
+        "/api/v1/tasks/999999",
         headers=headers
     )
     assert response.status_code == 404
@@ -110,7 +110,7 @@ def test_delete_nonexistent_task():
 def test_update_nonexistent_task():
     headers = get_auth_headers()
     response = client.put(
-        "/tasks/999999",
+        "/api/v1/tasks/999999",
         json={
             "title": "Updated"
         },
@@ -122,7 +122,7 @@ def test_update_nonexistent_task():
 def test_empty_title():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": ""
         },
@@ -134,7 +134,7 @@ def test_empty_title():
 def test_missing_title():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={},
         headers=headers
     )
@@ -144,7 +144,7 @@ def test_missing_title():
 def test_title_too_long():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "A" * 101
         },
@@ -157,7 +157,7 @@ def test_invalid_title_type():
 
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": 12345
         },
@@ -169,7 +169,7 @@ def test_invalid_title_type():
 def test_whitespace_title():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json = {
             "title": "  "
         },
@@ -181,7 +181,7 @@ def test_whitespace_title():
 def test_description_too_long():
     headers = get_auth_headers()
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Valid Title",
             "description": "A" * 1001

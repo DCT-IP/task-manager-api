@@ -9,14 +9,14 @@ client = TestClient(app)
 def test_login_rate_limit():
     for _ in range(5):
         client.post(
-            "/auth/login",
+            "/api/v1/auth/login",
             data={
                 "username": "wronguser",
                 "password": "wrongpass"
             }
         )
     response = client.post(
-        "/auth/login",
+        "/api/v1/auth/login",
         data={
             "username": "wronguser",
             "password": "wrongpass"
@@ -28,7 +28,7 @@ def test_login_rate_limit():
 def test_register_rate_limit():
     for _ in range(3):
         response = client.post(
-            "/auth/register",
+            "/api/v1/auth/register",
             json={
                 "username": f"user_{uuid.uuid4().hex[:8]}",
                 "email": f"{uuid.uuid4().hex[:8]}@test.com",
@@ -37,7 +37,7 @@ def test_register_rate_limit():
         )
         assert response.status_code == 201
     response = client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "username": f"user_{uuid.uuid4().hex[:8]}",
             "email": f"{uuid.uuid4().hex[:8]}@test.com",
@@ -51,14 +51,14 @@ def test_create_task_rate_limit():
     headers = get_auth_headers()
     for i in range(20):
         client.post(
-            "/tasks/",
+            "/api/v1/tasks/",
             json={
                 "title": f"Task {i}"
             },
             headers=headers
         )
     response = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Blocked"
         },
@@ -71,11 +71,11 @@ def test_get_tasks_rate_limit():
     headers = get_auth_headers()
     for _ in range(60):
         client.get(
-            "/tasks/",
+            "/api/v1/tasks/",
             headers=headers
         )
     response = client.get(
-        "/tasks/",
+        "/api/v1/tasks/",
         headers=headers
     )
     assert response.status_code == 429
@@ -84,7 +84,7 @@ def test_get_tasks_rate_limit():
 def test_update_task_rate_limit():
     headers = get_auth_headers()
     created = client.post(
-        "/tasks/",
+        "/api/v1/tasks/",
         json={
             "title": "Initial Task"
         },
@@ -94,14 +94,14 @@ def test_update_task_rate_limit():
     task_id = created.json()["id"]
     for i in range(20):
         client.put(
-            f"/tasks/{task_id}",
+            f"/api/v1/tasks/{task_id}",
             json={
                 "title": f"Updated {i}"
             },
             headers=headers
         )
     response = client.put(
-        f"/tasks/{task_id}",
+        f"/api/v1/tasks/{task_id}",
         json={
             "title": "Blocked"
         },

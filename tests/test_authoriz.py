@@ -5,10 +5,13 @@ from tests.helpers import create_user_and_login
 
 client = TestClient(app)
 
+API_PREFIX = "/api/v1"
+
+
 def test_user_cannot_view_other_user_task():
     headers_a = create_user_and_login()
     create_response = client.post(
-        "/tasks/",
+        f"{API_PREFIX}/tasks/",
         json={
             "title": "User A Task"
         },
@@ -17,15 +20,16 @@ def test_user_cannot_view_other_user_task():
     task_id = create_response.json()["id"]
     headers_b = create_user_and_login()
     response = client.get(
-        f"/tasks/{task_id}",
+        f"{API_PREFIX}/tasks/{task_id}",
         headers=headers_b
     )
     assert response.status_code == 403
 
+
 def test_user_cannot_update_other_user_task():
     headers_a = create_user_and_login()
     create_response = client.post(
-        "/tasks/",
+        f"{API_PREFIX}/tasks/",
         json={
             "title": "User A Task"
         },
@@ -34,7 +38,7 @@ def test_user_cannot_update_other_user_task():
     task_id = create_response.json()["id"]
     headers_b = create_user_and_login()
     response = client.put(
-        f"/tasks/{task_id}",
+        f"{API_PREFIX}/tasks/{task_id}",
         json={
             "title": "Hacked"
         },
@@ -42,10 +46,11 @@ def test_user_cannot_update_other_user_task():
     )
     assert response.status_code == 403
 
+
 def test_user_cannot_delete_other_user_task():
     headers_a = create_user_and_login()
     create_response = client.post(
-        "/tasks/",
+        f"{API_PREFIX}/tasks/",
         json={
             "title": "Delete Test"
         },
@@ -54,15 +59,16 @@ def test_user_cannot_delete_other_user_task():
     task_id = create_response.json()["id"]
     headers_b = create_user_and_login()
     response = client.delete(
-        f"/tasks/{task_id}",
+        f"{API_PREFIX}/tasks/{task_id}",
         headers=headers_b
     )
     assert response.status_code == 403
 
+
 def test_user_sees_only_own_tasks():
     headers_a = create_user_and_login()
     client.post(
-        "/tasks/",
+        f"{API_PREFIX}/tasks/",
         json={
             "title": "A Task"
         },
@@ -70,14 +76,14 @@ def test_user_sees_only_own_tasks():
     )
     headers_b = create_user_and_login()
     client.post(
-        "/tasks/",
+        f"{API_PREFIX}/tasks/",
         json={
             "title": "B Task"
         },
         headers=headers_b
     )
     response = client.get(
-        "/tasks/",
+        f"{API_PREFIX}/tasks/",
         headers=headers_a
     )
     tasks = response.json()
@@ -87,4 +93,3 @@ def test_user_sees_only_own_tasks():
     ]
     assert "A Task" in titles
     assert "B Task" not in titles
-

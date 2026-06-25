@@ -1,334 +1,344 @@
-# Architecture Overview
-## Project Summary
+# Task Manager API — Architecture Overview
 
-Task Manager API is a production-oriented REST API built using FastAPI and MySQL.
-The project was developed as part of a backend engineering roadmap focused on API development, authentication, authorization, database management, testing, containerization, and DevOps practices.
-The application allows authenticated users to create, manage, update, and delete their own tasks while enforcing ownership-based access control.
+## Live Links
 
----
+API:
+https://task-manager-api-cvf6.onrender.com/
 
-## Core Features
-
-### Task Management
-* Create Tasks
-* View Tasks
-* Update Tasks
-* Delete Tasks
-* Track Completion Status
-
-### Authentication & Authorization
-* User Registration
-* User Login
-* JWT Authentication
-* Protected Endpoints
-* Ownership-Based Access Control
-
-### Security
-* Password Hashing
-* Security Headers Middleware
-* Input Validation
-* Rate Limiting
-
-### DevOps
-* Dockerized Application
-* Docker Compose
-* Alembic Migrations
-* GitHub Actions CI
+Documentation:
+https://task-manager-api-cvf6.onrender.com/docs
 
 ---
 
-## High-Level Architecture
+# System Architecture
+
 ```text
-Client
-  │
-  ▼
-FastAPI Routes
-  │
-  ▼
-Dependencies
-(Authentication / Authorization)
-  │
-  ▼
-Service Layer
-  │
-  ▼
-SQLAlchemy ORM
-  │
-  ▼
-MySQL Database
-```
+                         Client
+                            │
+                            ▼
+                  ┌─────────────────┐
+                  │ FastAPI App     │
+                  │ (Uvicorn ASGI)  │
+                  └────────┬────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
 
-Supporting Components:
-``` text
-JWT Authentication
-Security Headers Middleware
-Rate Limiting
-Alembic Migrations
-Docker
-GitHub Actions CI
+ ┌────────────────┐ ┌───────────────┐ ┌────────────────┐
+ │ Middleware     │ │ API Routers   │ │ OpenAPI Docs   │
+ │                │ │               │ │ (/docs)        │
+ │ • CORS         │ │ • Auth        │ └────────────────┘
+ │ • Rate Limit   │ │ • Tasks       |
+ │ • Security     │ │ • Health      |
+ │ • Logging      │ │ • Metrics     |
+ │ • Metrics      │ │ • Background  |
+ └───────┬────────┘ └───────┬───────┘
+         │                  │
+         ▼                  ▼
+
+ ┌────────────────────────────────────┐
+ │         Service Layer              │
+ │                                    │
+ │ • Authentication Logic             │
+ │ • Task Business Logic              │
+ │ • Background Job Logic             │
+ └───────────────┬────────────────────┘
+                 │
+      ┌──────────┴──────────┐
+      │                     │
+      ▼                     ▼
+
+┌──────────────┐    ┌────────────────┐
+│ Redis        │    │ SQLAlchemy ORM │
+│              │    │                │
+│ • Rate Data  │    │ Database Access│
+│ • Health     │    └───────┬────────┘
+└──────────────┘            │
+                            ▼
+
+                    ┌─────────────┐
+                    │ MySQL       │
+                    │ Database    │
+                    └─────────────┘
 ```
 
 ---
 
-## Application Structure
-```text
-app/
-├── core/           # Configuration, authentication, rate limiting
-├── db/             # Database session management
-├── dependencies/   # Dependency injection utilities
-├── frontend/       # Minimal frontend client
-├── middleware/     # Security middleware
-├── models/         # Database models
-├── routes/         # API endpoints
-├── schemas/        # Request/response validation
-├── services/       # Business logic
-└── main.py
-```
-The project follows a layered architecture that separates routing, business logic, and persistence logic.
-
----
-
-## Request Flow
-A typical API request follows the path below:
+# Request Flow
 
 ```text
 Client Request
       │
       ▼
-FastAPI Route
+Middleware Layer
+      │
+      ├── Security Headers
+      ├── Rate Limiting
+      ├── Request Logging
+      └── Metrics Collection
+      │
+      ▼
+API Route
       │
       ▼
 Authentication Check
       │
       ▼
-Authorization Check
-      │
-      ▼
 Service Layer
       │
-      ▼
-Database Operations
+      ├── Redis Operations
+      └── Database Operations
       │
       ▼
-JSON Response
+Response
 ```
 
 ---
-## Authentication Flow
 
-The application uses JWT-based authentication.
-### User Registration
+# Core Components
+
+## Authentication
+
+Implemented using JWT tokens.
+
+Flow:
 
 ```text
-Client
-  │
-  ▼
-POST /auth/register
-  │
-  ▼
-Password Hashing
-  │
-  ▼
-Store User
-```
-Passwords are never stored in plaintext.
+Register User
+      │
+      ▼
+Password Hashing (bcrypt)
+      │
+      ▼
+Store User in MySQL
 
----
-
-### User Login
-```text
-Client Credentials
-        │
-        ▼
-POST /auth/login
-        │
-        ▼
+Login
+      │
+      ▼
 Credential Validation
-        │
-        ▼
-JWT Token Generated
-```
-Successful authentication returns a JWT access token.
-
----
-
-### Protected Requests
-```text
-JWT Token
-     │
-     ▼
-Authorization Header
-     │
-     ▼
-Token Validation
-     │
-     ▼
-Current User Retrieved
-```
-Authenticated endpoints require a valid JWT token before any business logic is executed.
-
----
-
-## Authorization Model
-Authentication identifies the user.
-Authorization determines which resources a user can access.
-The API enforces task ownership.
-Example:
-```text
-User A creates Task #1
-
-User B attempts:
-
-GET /tasks/1
-PUT /tasks/1
-DELETE /tasks/1
-
-Result:
-Access Denied
-```
-Users can only interact with tasks they own.
-
----
-
-## Database Design
-
-### User Model
-```text
-User
-├── id
-├── username
-├── email
-└── password_hash
-```
-
-### Task Model
-```text
-Task
-├── id
-├── title
-├── description
-├── completed
-├── created_at
-└── owner_id
-```
-
-### Relationship
-```text
-One User
-     │
-     ▼
-Many Tasks
-```
-The relationship is implemented using SQLAlchemy ORM relationships and foreign keys.
-
----
-
-## Security Architecture
-
-### Password Storage
-User passwords are hashed before being stored in the database.
-
-### Security Headers
-Every response includes security-focused HTTP headers:
-
-* X-Content-Type-Options
-* X-Frame-Options
-* Referrer-Policy
-* Permissions-Policy
-
-These headers help reduce common browser-based attack vectors.
-
-### Rate Limiting
-Rate limiting is applied to protect endpoints from excessive request volume and abuse.
-
----
-
-## Database Migration Strategy
-Database schema changes are managed through Alembic.
-
-Migration workflow:
-```text
-Model Changes
       │
       ▼
-Alembic Revision
+JWT Generation
       │
       ▼
-Migration Script
-      │
-      ▼
-Database Upgrade
+Protected Endpoints
 ```
-This enables reproducible schema evolution across environments.
+
+### Features
+
+- User registration
+- User login
+- JWT authentication
+- Protected routes
+- Ownership-based authorization
 
 ---
 
-## Testing Strategy
-Automated testing is implemented using Pytest.
+## Task Management
 
-Coverage includes:
+Supported operations:
 
-* Authentication
-* Authorization
-* Task Ownership
-* CRUD Operations
-* Input Validation
-* Security Headers
-* Rate Limiting
+- Create task
+- View tasks
+- View single task
+- Update task
+- Delete task
 
-Tests run automatically through GitHub Actions on every push and pull request.
+Ownership checks ensure users can only access their own tasks.
 
 ---
 
-## CI Pipeline
-The project uses GitHub Actions for Continuous Integration.
+## Rate Limiting
 
-Pipeline Flow:
+Implemented using:
+
+- SlowAPI
+- Redis backend
+
+Examples:
 
 ```text
-Developer Push
-       │
-       ▼
-GitHub Actions
-       │
-       ▼
-MySQL Service Container
-       │
-       ▼
-Alembic Migrations
-       │
-       ▼
-Pytest
-       │
-       ▼
-Pass / Fail
+Register → 3/min
+Login    → 5/min
+Tasks    → endpoint-specific limits
 ```
 
-This prevents unverified code from being merged into the main branch.
+Purpose:
+
+- Prevent abuse
+- Protect authentication endpoints
+- Demonstrate distributed rate limiting
 
 ---
 
-## Containerization
-The application is fully containerized using Docker and Docker Compose.
-Services:
+## Observability
+
+### Health Endpoint
+
 ```text
-api
-└── FastAPI Application
-db
-└── MySQL Database
+/api/v1/health
 ```
-Docker Compose orchestrates communication between the application and database containers.
+
+Checks:
+
+- MySQL connectivity
+- Redis connectivity
+
+Example response:
+
+```json
+{
+  "status": "healthy",
+  "database": "up",
+  "redis": "up"
+}
+```
 
 ---
-## Future Enhancements
-Planned improvements include:
 
-* Continuous Deployment (CD)
-* Production Deployment
-* Redis Caching
-* Background Tasks
-* Async Database Operations
-* Monitoring and Observability
+### Metrics Endpoint
 
+```text
+/api/v1/metrics
 ```
+
+Provides:
+
+- Application uptime
+- Request count
+- Service status
+
+Example response:
+
+```json
+{
+  "uptime_seconds": 12345,
+  "requests_total": 500,
+  "status": "active"
+}
 ```
+
+---
+
+## Background Tasks
+
+Endpoint:
+
+```text
+/api/v1/background/email
+```
+
+Uses FastAPI BackgroundTasks to execute work after the response has been returned.
+
+Demonstrates:
+
+- Non-blocking task execution
+- Separation of user response from secondary work
+
+---
+
+## Async Demonstrations
+
+Learning endpoints:
+
+```text
+/api/v1/tasks/slow
+/api/v1/tasks/blocking
+/api/v1/tasks/external
+/api/v1/tasks/multi-external
+```
+
+These demonstrate:
+
+- asyncio
+- async HTTP requests
+- concurrent execution
+- blocking vs non-blocking behavior
+
+---
+
+# Infrastructure
+
+## Database
+
+- MySQL
+- SQLAlchemy ORM
+- Alembic migrations
+
+## Cache / Supporting Services
+
+- Redis
+- Rate-limiting storage
+- Health monitoring
+
+## Deployment
+
+Application:
+https://task-manager-api-cvf6.onrender.com/
+
+Documentation:
+https://task-manager-api-cvf6.onrender.com/docs
+
+---
+
+# CI Pipeline
+
+GitHub Actions executes:
+
+```text
+Push / Pull Request
+          │
+          ▼
+Install Dependencies
+          │
+          ▼
+Run Alembic Migrations
+          │
+          ▼
+Run Pytest Suite
+          │
+          ▼
+Report Status
+```
+
+Current automated coverage includes:
+
+- Authentication
+- Authorization
+- Task CRUD
+- Ownership checks
+- Validation
+- Rate limiting
+- Background routes
+- Health endpoints
+
+---
+
+# Learning Outcomes
+
+This project was used to gain hands-on experience with:
+
+- FastAPI
+- REST API Design
+- JWT Authentication
+- Authorization
+- SQLAlchemy
+- Alembic
+- MySQL
+- Redis
+- AsyncIO
+- Background Tasks
+- Docker
+- CI/CD
+- Automated Testing
+- API Documentation
+- Production Deployment
+
+---
+
+# Project Status
+
+Version: v1.0.0
+
+The project is considered feature-complete for its learning objectives and serves as a production-oriented backend engineering portfolio project.

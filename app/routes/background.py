@@ -1,16 +1,19 @@
-from fastapi import APIRouter
-from fastapi import BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks
 
-from app.services.background_service import (
-    send_fake_email
-)
+from app.services.background_service import send_fake_email
+
 
 router = APIRouter(
     prefix="/background",
-    tags=["Background Tasks"]
+    tags=["Background Jobs"]
 )
 
-@router.post("/email")
+
+@router.post(
+    "/email",
+    summary="Send email in background",
+    description="Simulates sending an email asynchronously using FastAPI BackgroundTasks."
+)
 def background_email(
     email: str,
     background_tasks: BackgroundTasks

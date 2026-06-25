@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.core.rate_limiting import limiter
+
 from app.schemas.auth import (
     TokenResponse,
     UserRegister,
@@ -18,17 +19,22 @@ from app.services.auth_service import (
 from app.core.JWT_handler import create_access_token
 from app.dependencies.auth import get_current_user
 
+
 router = APIRouter(
     prefix="/auth",
-    tags=["Auth"]
+    tags=["Authentication"]
 )
 
 
-# Register route
+# -------------------------
+# Register User
+# -------------------------
 @router.post(
     "/register",
     response_model=UserResponse,
-    status_code=201
+    status_code=201,
+    summary="Register a new user",
+    description="Creates a new account using username, email and password."
 )
 @limiter.limit("3/minute")
 def register_user(
@@ -36,20 +42,22 @@ def register_user(
     user: UserRegister,
     db: Session = Depends(get_db)
 ):
-    created_user = register_user_service(
+    return register_user_service(
         db=db,
         username=user.username,
         email=user.email,
         password=user.password
     )
 
-    return created_user
 
-
-# Login route
+# -------------------------
+# Login User
+# -------------------------
 @router.post(
     "/login",
-    response_model=TokenResponse
+    response_model=TokenResponse,
+    summary="Login user and generate JWT token",
+    description="Authenticates user credentials and returns a JWT access token."
 )
 @limiter.limit("5/minute")
 def login_user(
@@ -76,8 +84,14 @@ def login_user(
     }
 
 
-# Protected route
-@router.get("/me")
+# -------------------------
+# Get Current User
+# -------------------------
+@router.get(
+    "/me",
+    summary="Get current logged-in user",
+    description="Returns details of the authenticated user."
+)
 @limiter.limit("60/minute")
 def get_me(
     request: Request,

@@ -1,162 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Task Manager</title>
-  <style>
-    body {
-      font-family: Arial;
-      margin: 40px;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px;
-    }
-    li {
-      margin: 5px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager API Control Panel</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
-<h2>Task Manager (Minimal UI)</h2>
+<div class="container">
 
-<!-- Create Task -->
-<input id="taskInput" placeholder="Enter task" />
-<button onclick="createTask()">Add</button>
+    <header>
+        <h1>Task Manager SYSTEM v1.0</h1>
+        <button class="action-btn theme-toggle-btn" id="theme-toggle">MODE: BINARY</button>
+        <p class="description">
+            Production-oriented FastAPI backend system architecture. Demonstrating 
+            asynchronous processing, authorization matrices, Redis caching topologies, 
+            and containerized CI/CD engineering principles.
+        </p>
+        <div class="api-status-wrapper">
+            SYS_STATUS: <span id="status" class="status-text loading">[LOADING]</span>
+        </div>
+    </header>
 
-<!-- Load Tasks -->
-<button onclick="loadTasks()">Refresh</button>
+    <div class="section-title">01. Telemetry Metrics</div>
+    <div class="data-table">
+        <div class="data-row">
+            <span class="data-label">System Uptime</span>
+            <span id="uptime" class="data-value">Loading...</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Aggregated Inbound Requests</span>
+            <span id="requests" class="data-value">Loading...</span>
+        </div>
+    </div>
 
-<ul id="taskList" style="list-style: none; padding: 0;"></ul>
+    <div class="section-title">02. Subsystem Integrity Matrix</div>
+    <div class="data-table">
+        <div class="data-row">
+            <span class="data-label">Core Kernel Gateway Status</span>
+            <span id="overall-status" class="data-value">Loading...</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Relational Database Subsystem</span>
+            <span id="database-status" class="data-value">Loading...</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Redis Cache Cluster Integrity</span>
+            <span id="redis-status" class="data-value">Loading...</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Gateway Telemetry Latency (RTT)</span>
+            <span id="ping-latency" class="data-value">--</span>
+        </div>
+      </div>
 
-<script>
-const API = "/tasks";
+    <div class="section-title">03. Engineering Ledger</div>
+    <div class="data-table">
+        <div class="data-row">
+            <span class="data-label">Lead Engineer</span>
+            <span class="data-value">Dheeman Chaitanya Thakur</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Accreditation</span>
+            <span class="data-value">BTech Mathematics & Computing</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Research Directives</span>
+            <span class="data-value">Systems, Cryptography, Networks</span>
+        </div>
+    </div>
 
+    <div class="controls-row">
+        <button class="action-btn" onclick="location.href='/docs'">
+            Execute API Docs Reference
+        </button>
+    </div>
 
-// -------------------------
-// CREATE TASK
-// -------------------------
-async function createTask() {
-    const title =
-        document.getElementById("taskInput").value;
-    if (!title) {
-        alert("Enter a task");
-        return;
-    }
-    await fetch(API + "/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            title: title
-        })
-    });
-    document.getElementById("taskInput").value = "";
-    loadTasks();
-}
+    <div class="section-title">04. Real-time Interrupt Logs</div>
+    <div class="terminal-log" id="term-log">
+        <div class="log-entry">> Initializing Subsystem Telemetry Listener...</div>
+    </div>
 
-// -------------------------
-// LOAD TASKS
-// -------------------------
-async function loadTasks() {
-    const list =
-        document.getElementById("taskList");
-    list.innerHTML = "<p>Loading...</p>";
-    const res =
-        await fetch(API + "/");
-    const tasks =
-        await res.json();
-    list.innerHTML = "";
-    if (!Array.isArray(tasks)) {
-        console.error(tasks);
-        return;
-    }
+    <footer>
+        <div class="footer-left">
+            Distribution Permission: <a href="https://github.com/DCT-IP/task-manager-api/blob/main/LICENSE" target="_blank">[MIT_LICENSE]</a>
+        </div>
+        <div class="footer-right">
+            Channels: 
+            <a href="mailto:yourmail@gmail.com">Mail</a> // 
+            <a href="https://github.com/DCT-IP/task-manager-api" target="_blank">Git</a> // 
+            <a href="https://www.linkedin.com/in/dheeman-chaitanya-thakur-47814338a/" target="_blank">LinkedIn</a>
+        </div>
+    </footer>
 
-    tasks.forEach(task => {
-        const li =
-            document.createElement("li");
-        li.style.padding = "12px";
-        li.style.border = "1px solid gray";
-        li.style.marginBottom = "10px";
-        li.style.listStyle = "none";
-        li.innerHTML = `
-    <strong>${task.title}</strong>
+</div>
 
-    <br>
-
-    Status:
-    ${
-        task.completed
-        ? "✅ Completed"
-        : "❌ Incomplete"
-    }
-
-    <br><br>
-
-    <button onclick="toggleTask(
-        ${task.id},
-        ${task.completed}
-    )">
-        ${
-            task.completed
-            ? "Undo"
-            : "Complete"
-        }
-    </button>
-
-    <button onclick="editTask(
-        ${task.id},
-        '${task.title}'
-    )">
-        Edit
-    </button>
-
-    <button onclick="deleteTask(${task.id})">
-        Delete
-    </button>
-`;
-    });
-}
-
-// -------------------------
-// TOGGLE TASK STATUS
-// -------------------------
-async function toggleTask(id, completed) {
-    const newTitle =
-        prompt(
-            "Edit task title:",
-            currentTitle
-        );
-        if (!newTitle) return;
-    await fetch(API + "/" + id, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            completed: !completed
-        })
-    });
-    loadTasks();
-}
-
-// -------------------------
-// DELETE TASK
-// -------------------------
-async function deleteTask(id) {
-
-    await fetch(API + "/" + id, {
-        method: "DELETE"
-    });
-    loadTasks();
-}
-
-// -------------------------
-// AUTO LOAD TASKS
-// -------------------------
-loadTasks();
-</script>
-
+<script src="/static/script.js"></script>
 </body>
 </html>
