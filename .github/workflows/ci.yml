@@ -1,68 +1,86 @@
 name: Task Manager API CI
 
 on:
-  push:
-    branches:
-      - main
+push:
+branches:
+- main
 
-  pull_request:
-    branches:
-      - main
+pull_request:
+branches:
+- main
 
 jobs:
-  test:
+test:
 
-    runs-on: ubuntu-latest
+```
+runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
+services:
 
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: taskdb
-          MYSQL_USER: api_user
-          MYSQL_PASSWORD: 1234
-
-        ports:
-          - 3306:3306
-
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=20
+  mysql:
+    image: mysql:8.0
 
     env:
-      DATABASE_URL: mysql+pymysql://api_user:1234@127.0.0.1:3306/taskdb
-      APP_NAME: Task Manager API
-      SECRET_KEY: testsecretkey
-      ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: taskdb
+      MYSQL_USER: api_user
+      MYSQL_PASSWORD: 1234
 
-    steps:
+    ports:
+      - 3306:3306
 
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    options: >-
+      --health-cmd="mysqladmin ping -h localhost -proot"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=20
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+  redis:
+    image: redis:7
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    ports:
+      - 6379:6379
 
-      - name: Wait for MySQL
-        run: |
-          sleep 15
+    options: >-
+      --health-cmd="redis-cli ping"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=20
 
-      - name: Run Alembic Migrations
-        run: |
-          alembic upgrade head
+env:
+  DATABASE_URL: mysql+pymysql://api_user:1234@127.0.0.1:3306/taskdb
+  APP_NAME: Task Manager API
+  SECRET_KEY: testsecretkey
+  ALGORITHM: HS256
+  ACCESS_TOKEN_EXPIRE_MINUTES: 30
 
-      - name: Run Tests
-        run: |
-          pytest -v -x
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+
+steps:
+
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
+
+  - name: Install Dependencies
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+
+  - name: Wait for Services
+    run: |
+      sleep 15
+
+  - name: Run Alembic Migrations
+    run: |
+      alembic upgrade head
+
+  - name: Run Tests
+    run: |
+      pytest -v -x
+```
