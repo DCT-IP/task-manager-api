@@ -10,38 +10,39 @@ This system serves as a showcase of advanced backend engineering practices, focu
 
 The application is structured as a decoupled, multi-layered architecture designed to maximize horizontal scaling, optimize database traffic via distributed caching, and handle long-running operations asynchronously.
 
+```text
        ┌────────────────────────────────────────────────────────┐
-       │                   Client Request                       │
+       │                     Client Request                     │
        └──────────────────────────┬─────────────────────────────┘
                                   │
                                   ▼
        ┌────────────────────────────────────────────────────────┐
-       │             Uvicorn ASGI Web Server                    │
+       │                Uvicorn ASGI Web Server                 │
        └──────────────────────────┬─────────────────────────────┘
                                   │
                                   ▼
        ┌────────────────────────────────────────────────────────┐
        │           FastAPI Middleware & Guard Layers            │
-       │    (Cors, Security Headers, Redis Rate Limiter)        │
+       │    (CORS, Security Headers, Redis Rate Limiter)        │
        └──────────────────────────┬─────────────────────────────┘
                                   │
                                   ▼
        ┌────────────────────────────────────────────────────────┐
        │               API Versioned Router (/v1)               │
-       │    (Input Validation, Authentication, Route Handlers)   │
+       │    (Input Validation, Authentication, Route Handlers)  │
        └──────────────────────────┬─────────────────────────────┘
                                   │
          ┌────────────────────────┴────────────────────────┐
          │                                                 │
          ▼                                                 ▼
 ┌─────────────────────────────────┐               ┌─────────────────────────────────┐
-│        Service Layer            │               │      Background Tasks           │
-│   (Core Business Logic)         │               │     (Async Workers)             │
+│          Service Layer          │               │        Background Tasks         │
+│      (Core Business Logic)      │               │         (Async Workers)         │
 └────────┬────────────────┬───────┘               └─────────────────────────────────┘
          │                │
          ▼                ▼
 ┌─────────────────┐┌───────────────┐
-│  Redis Cache    ││ SQLAlchemy ORM│
+│   Redis Cache   ││ SQLAlchemy ORM│
 │ (Session/Tasks) ││ (PyMySQL / DB)│
 └─────────────────┘└──────┬────────┘
                           │
@@ -50,6 +51,7 @@ The application is structured as a decoupled, multi-layered architecture designe
                   │  MySQL Pool   │
                   └───────────────┘
 
+```
 ---
 
 ## System Overview
@@ -95,7 +97,7 @@ The API adheres strictly to REST principles and scales via explicitly versioned 
 ---
 
 ## Project Directory Layout
-
+```text
 task-manager-api/
 ├── .github/workflows/    # CI Pipeline Orchestration
 │   └── ci.yml
@@ -114,6 +116,7 @@ task-manager-api/
 ├── docker-compose.yml    # Full-Stack Local Infrastructure Blueprint
 ├── alembic.ini           # Database Migration Mapping Specifications
 └── requirements.txt      # Locked External Software Dependencies
+```
 
 ---
 
