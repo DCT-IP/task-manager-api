@@ -12,6 +12,7 @@ engine = create_engine(
     pool_pre_ping=True
 )
 
+print(settings.DATABASE_URL)
 # -------------------------
 # SESSION FACTORY
 # -------------------------

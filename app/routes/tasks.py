@@ -1,7 +1,7 @@
 import asyncio
 import time
 from typing import List
-
+from app.core.metrics import increment_counter
 import httpx
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
@@ -138,7 +138,18 @@ async def multi_external(
         "results": results
     }
 
+#demo
+@router.get("/redis-limit-demo")
+def redis_limit_demo(
+    current_user: dict = Depends(get_current_user)
+):
+    count = increment_counter(
+        current_user["user_id"]
+    )
 
+    return {
+        "requests_this_minute": count
+    }
 # -------------------------
 # GET SINGLE TASK
 # -------------------------
@@ -242,3 +253,4 @@ def delete_task(
     return {
         "message": "Task deleted"
     }
+

@@ -2,10 +2,11 @@ import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-
+from app.routes.health import router as health_router
 from app.routes.tasks import router as tasks_router
 from app.routes.auth import router as auth_router
-
+from app.routes.background_demo import router as background_router
+from app.routes.background import (router as background_router)
 from app.logger import logger
 from app.database import engine, Base
 from app.models import user, task   # IMPORTANT: registers models
@@ -32,7 +33,6 @@ app.add_exception_handler(
 )
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-
 @app.middleware("http")
 async def log_requests(request, call_next):
     start_time = time.time()
@@ -62,6 +62,8 @@ app.add_middleware(
 # -------------------------
 app.include_router(tasks_router)
 app.include_router(auth_router)
+app.include_router(health_router)
+app.include_router(background_router)
 # -------------------------
 # HEALTH CHECK
 # -------------------------
@@ -80,3 +82,4 @@ def serve_ui():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+

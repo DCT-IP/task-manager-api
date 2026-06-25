@@ -2,12 +2,15 @@ from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
 from app.logger import logger
-
+import json
+from app.core.redis_client import redis_client
+from app.core.metrics import increment_counter
 # -------------------------
 # CREATE TASK AND LOG
 # -------------------------
-logger.info("Creating a new task")
+
 def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Task:
+    logger.info("Creating a new task")
     new_task = Task(
         title=task_data.title,
         description=task_data.description,
@@ -18,8 +21,12 @@ def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Ta
     try:
       db.commit()
     except Exception as e:
+        db.rollback()
         logger.exception(f"Failed to create task: {e}")
+        raise 
     db.refresh(new_task)
+    redis_client.delete(
+    f"tasks:{owner_id}")
     logger.info(f"Task created with ID: {new_task.id}")
     return new_task
 
@@ -29,10 +36,39 @@ def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Ta
 # -------------------------
 def get_tasks_service(db: Session,
                       user_id: int) -> list[Task]:
-    logger.info(f"Fetching all tasks for {user_id}")
-    tasks = db.query(Task).filter(Task.owner_id == user_id).all()
-    logger.info(f"Retrieved {len(tasks)} tasks for {user_id}")
-    return tasks
+    cache_key = f"tasks:{user_id}"
+    cached_tasks = redis_client.get(cache_key)
+    if cached_tasks:
+        logger.info(
+            f"Cache hit for user {user_id}"
+        )
+        return json.loads(cached_tasks)
+    logger.info(
+        f"Cache miss for user {user_id}"
+    )
+    tasks = (
+        db.query(Task)
+        .filter(Task.owner_id == user_id)
+        .all()
+    )
+    task_list = [
+        {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "completed": task.completed,
+            "owner_id": task.owner_id,
+            "created_at":task.created_at.isoformat()
+                if task.created_at else None
+        }
+        for task in tasks
+    ]
+    redis_client.setex(
+        cache_key,
+        60,
+        json.dumps(task_list)
+    )
+    return task_list
 
 
 # -------------------------
@@ -55,6 +91,8 @@ def delete_task_service(db: Session, task: Task) -> None:
     logger.info(f"Deleting task with ID: {task.id}")
     db.delete(task)
     db.commit()
+    redis_client.delete(
+    f"tasks:{task.owner_id}")
     logger.info(f"Task deleted with ID: {task.id}")
 
 
@@ -79,6 +117,9 @@ def update_task_service(
     if task_data.completed is not None:
         task.completed = task_data.completed
     db.commit()
+    redis_client.delete(
+    f"tasks:{task.owner_id}"
+    )
     db.refresh(task)
     logger.info(f"Task updated with ID: {task.id}")
     return task

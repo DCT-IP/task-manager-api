@@ -12,3 +12,4 @@ python-jose[cryptography]
 python-multipart
 slowapi
 alembic
+redis
