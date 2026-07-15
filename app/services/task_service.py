@@ -98,8 +98,8 @@ def update_task_service(
     if task_data.completed is not None:
         task.completed = task_data.completed
     db.commit()
-    #redis_client.delete(f"tasks:{task.owner_id}"
-    )
+    #redis_client.delete(f"tasks:{task.owner_id})"
+    
     db.refresh(task)
     logger.info(f"Task updated with ID: {task.id}")
     return task
