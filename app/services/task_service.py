@@ -73,8 +73,7 @@ def delete_task_service(db: Session, task: Task) -> None:
     logger.info(f"Deleting task with ID: {task.id}")
     db.delete(task)
     db.commit()
-    redis_client.delete(
-    f"tasks:{task.owner_id}")
+    #redis_client.delete(f"tasks:{task.owner_id}")
     logger.info(f"Task deleted with ID: {task.id}")
 
 
@@ -99,8 +98,7 @@ def update_task_service(
     if task_data.completed is not None:
         task.completed = task_data.completed
     db.commit()
-    redis_client.delete(
-    f"tasks:{task.owner_id}"
+    #redis_client.delete(f"tasks:{task.owner_id}"
     )
     db.refresh(task)
     logger.info(f"Task updated with ID: {task.id}")
