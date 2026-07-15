@@ -25,8 +25,7 @@ def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Ta
         logger.exception(f"Failed to create task: {e}")
         raise 
     db.refresh(new_task)
-    redis_client.delete(
-    f"tasks:{owner_id}")
+    #redis_client.delete(f"tasks:{owner_id}")
     logger.info(f"Task created with ID: {new_task.id}")
     return new_task
 
