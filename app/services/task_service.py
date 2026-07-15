@@ -34,41 +34,24 @@ def create_task_service(db: Session, task_data: TaskCreate, owner_id: int) -> Ta
 # -------------------------
 # GET ALL TASKS AND LOG
 # -------------------------
-def get_tasks_service(db: Session,
-                      user_id: int) -> list[Task]:
-    cache_key = f"tasks:{user_id}"
-    cached_tasks = redis_client.get(cache_key)
-    if cached_tasks:
-        logger.info(
-            f"Cache hit for user {user_id}"
-        )
-        return json.loads(cached_tasks)
-    logger.info(
-        f"Cache miss for user {user_id}"
-    )
+def get_tasks_service(db: Session, user_id: int):
     tasks = (
         db.query(Task)
         .filter(Task.owner_id == user_id)
         .all()
     )
-    task_list = [
+
+    return [
         {
             "id": task.id,
             "title": task.title,
             "description": task.description,
             "completed": task.completed,
             "owner_id": task.owner_id,
-            "created_at":task.created_at.isoformat()
-                if task.created_at else None
+            "created_at": task.created_at.isoformat() if task.created_at else None
         }
         for task in tasks
     ]
-    redis_client.setex(
-        cache_key,
-        60,
-        json.dumps(task_list)
-    )
-    return task_list
 
 
 # -------------------------
